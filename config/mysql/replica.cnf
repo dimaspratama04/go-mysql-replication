@@ -1,0 +1,25 @@
+[mysqld]
+# ─── Server Identity ───────────────────────
+server-id           = 2
+bind-address        = 0.0.0.0
+
+# ─── Replica Settings ──────────────────────
+relay_log           = mysql-relay-bin
+log_slave_updates   = ON
+read_only           = ON          # Replica is read-only
+
+# ─── GTID ──────────────────────────────────
+gtid_mode               = ON
+enforce_gtid_consistency = ON
+
+# ─── Binary Log (for replica chain) ────────
+log_bin             = mysql-bin
+binlog_format       = ROW
+
+# ─── Performance ───────────────────────────
+innodb_buffer_pool_size     = 256M
+innodb_log_file_size        = 64M
+
+# ─── Character Set ─────────────────────────
+character-set-server    = utf8mb4
+collation-server        = utf8mb4_unicode_ci

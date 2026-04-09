@@ -1,0 +1,14 @@
+FROM mysql:8
+
+# Copy setup script
+COPY scripts/setup-replica.sh /usr/local/bin/setup-replica.sh
+RUN chmod +x /usr/local/bin/setup-replica.sh
+
+# Custom entrypoint that:
+# 1. Starts MySQL normally via original entrypoint (background)
+# 2. Runs setup-replica.sh after MySQL is ready
+COPY scripts/replica-entrypoint.sh /usr/local/bin/replica-entrypoint.sh
+RUN chmod +x /usr/local/bin/replica-entrypoint.sh
+
+ENTRYPOINT ["replica-entrypoint.sh"]
+CMD ["mysqld"]

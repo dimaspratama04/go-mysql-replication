@@ -1,0 +1,26 @@
+[mysqld]
+# ─── Server Identity ───────────────────────
+server-id = 1
+bind-address = 0.0.0.0
+
+# ─── Binary Log ────────────────────────────
+log_bin = mysql-bin
+binlog_format = ROW
+binlog_row_image = FULL
+binlog_expire_logs_seconds = 604800
+max_binlog_size = 100M
+
+# ─── GTID ──────────────────────────────────
+gtid_mode = ON
+enforce_gtid_consistency = ON
+log_slave_updates = ON   # penting kalau nanti chaining replication
+
+# ─── Performance ───────────────────────────
+innodb_buffer_pool_size = 256M
+innodb_redo_log_capacity = 134217728
+innodb_flush_log_at_trx_commit = 1
+sync_binlog = 1
+
+# ─── Character Set ─────────────────────────
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci

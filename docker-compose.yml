@@ -1,0 +1,100 @@
+version: "3.9"
+
+services:
+  # ─────────────────────────────────────────────────────────────────
+  # MySQL 8 - Primary (Source)
+  # Auto-runs migrations via docker-entrypoint-initdb.d
+  # ─────────────────────────────────────────────────────────────────
+  mysql-primary:
+    image: mysql:8
+    container_name: mysql-primary
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: products_db
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_primary_data:/var/lib/mysql
+      - ./migrations:/docker-entrypoint-initdb.d:ro # ← Auto migration + replication user
+      - ./config/mysql/primary.cnf:/etc/mysql/conf.d/primary.cnf:ro
+    networks:
+      - rnd-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  # ─────────────────────────────────────────────────────────────────
+  # MySQL 8 - Replica
+  # Custom image: auto-configures GTID replication on first start
+  # ─────────────────────────────────────────────────────────────────
+  mysql-replica:
+    build:
+      context: .
+      dockerfile: Dockerfile.replica
+    container_name: mysql-replica
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: products_db
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+      MYSQL_PRIMARY_HOST: mysql-primary
+      MYSQL_PRIMARY_PORT: 3306
+      MYSQL_REPL_USER: replicator
+      MYSQL_REPL_PASSWORD: replicatorpass
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_replica_data:/var/lib/mysql
+      - ./config/mysql/replica.cnf:/etc/mysql/conf.d/replica.cnf:ro
+    networks:
+      - rnd-network
+    depends_on:
+      mysql-primary:
+        condition: service_healthy
+
+  # ─────────────────────────────────────────────────────────────────
+  # Go Application (GoFiber)
+  # Connects to Primary for all writes
+  # ─────────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: products-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      - rnd-network
+    depends_on:
+      mysql-primary:
+        condition: service_healthy
+
+volumes:
+  mysql_primary_data:
+    driver: local
+  mysql_replica_data:
+    driver: local
+
+networks:
+  rnd-network:
+    driver: bridge
