@@ -2,64 +2,62 @@ datadir="/var/lib/proxysql"
 
 admin_variables=
 {
-  admin_credentials="admin:admin"
-  admin_ifaces="0.0.0.0:6032"
+    admin_credentials="admin:admin;radmin:radmin"
+    mysql_ifaces="0.0.0.0:6032"
 }
 
 mysql_variables=
 {
-  monitor_username="monitor"
-  monitor_password="monitorpass"
-  threads=4
-  max_connections=2048
-  default_query_delay=0
-  default_query_timeout=36000000
+    threads=4
+    max_connections=2048
+    default_query_delay=0
+    default_query_timeout=36000000
+    have_compress=true
+    poll_timeout=2000
+    interfaces="0.0.0.0:6033"
+    default_schema="information_schema"
+    stacksize=1048576
+    server_version="5.5.30"
+    connect_timeout_server=3000
+    monitor_username="monitor"
+    monitor_password="monitorpass"
+    monitor_history=600000
+    monitor_connect_interval=60000
+    monitor_ping_interval=10000
+    monitor_read_only_interval=1500
+    monitor_read_only_timeout=500
+    ping_interval_server_msec=120000
+    ping_timeout_server=500
+    commands_stats=true
+    sessions_sort=true
+    connect_retries_on_failure=10
 }
 
-# =========================
-# BACKEND MYSQL SERVERS
-# =========================
-mysql_servers =
+mysql_servers=
 (
   {
     address="mysql-primary"
     port=3306
-    hostgroup=10   # writer
-    max_connections=150
-    use_ssl=0
+    hostgroup_id=10
+    max_connections=200
   },
   {
     address="mysql-replica"
     port=3307
-    hostgroup=20   # reader
-    max_connections=150
-    use_ssl=0
+    hostgroup_id=20
+    max_connections=200
   }
 )
 
-# =========================
-# USERS (APP LOGIN)
-# =========================
-mysql_users =
-(
-  {
-    username = "root"
-    password = "rootpasssword"
-    default_hostgroup = 10
-    transaction_persistent = 1
-  }
-)
 
-# =========================
-# QUERY RULES
-# =========================
-mysql_query_rules =
+mysql_users=
 (
   {
-    rule_id=1
+    username="appuser"
+    password="apppassword"
+    default_hostgroup=10
+    max_connections=1000
+    default_schema="information_schema"
     active=1
-    match_pattern="^SELECT.*"
-    destination_hostgroup=20
-    apply=1
   }
 )

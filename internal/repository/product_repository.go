@@ -11,17 +11,16 @@ import (
 )
 
 type ProductRepository struct {
-	primary  *gorm.DB
-	replicas *gorm.DB
+	dbs *gorm.DB
 }
 
 func NewProductRepository(db *config.Database) *ProductRepository {
-	return &ProductRepository{primary: db.Primary, replicas: db.Replicas}
+	return &ProductRepository{dbs: db.Mysql}
 }
 
 func (r *ProductRepository) FindAll(ctx context.Context) ([]model.Product, error) {
 	var products []model.Product
-	result := r.replicas.WithContext(ctx).Order("id DESC").Find(&products)
+	result := r.dbs.WithContext(ctx).Order("id DESC").Find(&products)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -30,7 +29,7 @@ func (r *ProductRepository) FindAll(ctx context.Context) ([]model.Product, error
 
 func (r *ProductRepository) FindByID(ctx context.Context, id uint) (*model.Product, error) {
 	var product model.Product
-	result := r.replicas.WithContext(ctx).First(&product, id)
+	result := r.dbs.WithContext(ctx).First(&product, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil
@@ -48,7 +47,7 @@ func (r *ProductRepository) Create(ctx context.Context, req model.CreateProductR
 		Stock:       req.Stock,
 	}
 
-	result := r.primary.WithContext(ctx).Create(&product)
+	result := r.dbs.WithContext(ctx).Create(&product)
 	if result.Error != nil {
 		log.Error().Err(result.Error).Str("operation", "CREATE").Msg("Failed to create product")
 		return nil, result.Error
@@ -80,7 +79,7 @@ func (r *ProductRepository) Update(ctx context.Context, id uint, req model.Updat
 	beforePrice := product.Price
 	beforeStock := product.Stock
 
-	result := r.primary.WithContext(ctx).Model(product).Updates(map[string]interface{}{
+	result := r.dbs.WithContext(ctx).Model(product).Updates(map[string]interface{}{
 		"name":        req.Name,
 		"description": req.Description,
 		"price":       req.Price,
@@ -114,7 +113,7 @@ func (r *ProductRepository) Delete(ctx context.Context, id uint) (bool, error) {
 		return false, nil
 	}
 
-	result := r.primary.WithContext(ctx).Delete(&model.Product{}, id)
+	result := r.dbs.WithContext(ctx).Delete(&model.Product{}, id)
 	if result.Error != nil {
 		log.Error().Err(result.Error).Str("operation", "DELETE").Uint("product_id", id).Msg("Failed to delete product")
 		return false, result.Error

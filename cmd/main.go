@@ -32,10 +32,11 @@ func main() {
 	log.Info().Msg("Starting MySQL Replication RnD - Products API")
 
 	// DB
-	primaryDBCfg := config.PrimaryDBConfig()
-	replicaDBCfg := config.ReplicaDBConfig()
+	// primaryDBCfg := config.PrimaryDBConfig()
+	// replicaDBCfg := config.ReplicaDBConfig()
+	databaseConfig := config.ProxyDBConfig()
 
-	db, err := config.NewInitDatabase(primaryDBCfg, replicaDBCfg)
+	db, err := config.NewInitDatabase(databaseConfig)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect database")
 	}
