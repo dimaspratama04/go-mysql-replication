@@ -53,7 +53,7 @@ func NewDB(cfg DBConfig) (*gorm.DB, error) {
 		Logger: logger.Default.LogMode(logger.Silent), // Logging handled by zerolog
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("failed to connect to database, on %s:%s/%s: %w", cfg.Host, cfg.Port, cfg.Name, err)
 	}
 
 	sqlDB, err := db.DB()

@@ -11,14 +11,11 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: products_db
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppassword
     ports:
       - "3306:3306"
     volumes:
       - mysql_primary_data:/var/lib/mysql
-      - ./migrations:/docker-entrypoint-initdb.d:ro # ← Auto migration + replication user
+      - ./migrations:/docker-entrypoint-initdb.d:ro
       - ./config/mysql/primary.cnf:/etc/mysql/conf.d/primary.cnf:ro
     networks:
       - rnd-network
@@ -38,22 +35,22 @@ services:
       timeout: 5s
       retries: 12
       start_period: 40s
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # ← For replica to access primary on host
 
   # ─────────────────────────────────────────────────────────────────
   # MySQL 8 - Replica
   # Custom image: auto-configures GTID replication on first start
   # ─────────────────────────────────────────────────────────────────
   mysql-replica:
-    build:
-      context: .
-      dockerfile: Dockerfile.replica
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.replica
+    image: mysql:8
     container_name: mysql-replica
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: products_db
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppassword
       MYSQL_PRIMARY_HOST: mysql-primary
       MYSQL_PRIMARY_PORT: 3306
       MYSQL_REPL_USER: replicator
@@ -68,6 +65,20 @@ services:
     depends_on:
       mysql-primary:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword",
+        ]
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # ← For replica to access primary on host
 
   # ─────────────────────────────────────────────────────────────────
   # Go Application (GoFiber)
@@ -88,6 +99,25 @@ services:
     depends_on:
       mysql-primary:
         condition: service_healthy
+      mysql-replica:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  proxysql:
+    image: proxysql/proxysql:latest
+    container_name: proxysql
+    ports:
+      - "6032:6032"
+      - "6033:6033"
+      - "6070:6070"
+    volumes:
+      - ./config/mysql/proxysql.cnf:/etc/proxysql.cnf:ro
+    restart: always
+    networks:
+      - rnd-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   mysql_primary_data:

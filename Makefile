@@ -101,24 +101,3 @@ shell-primary:
 
 shell-replica:
 	docker exec -it mysql-replica mysql -uroot -prootpassword products_db
-
-help:
-	@echo ""
-	@echo "  MySQL Replication RnD - Available Commands"
-	@echo "  ─────────────────────────────────────────"
-	@echo "  make up                 Start all services (build + up)"
-	@echo "  make down               Stop all services"
-	@echo "  make clean              Remove containers + volumes + images"
-	@echo "  make logs               Tail all logs"
-	@echo "  make logs-app           Tail app logs only"
-	@echo "  make status             Show container + API health status"
-	@echo "  make replication-status Show MySQL replication thread status"
-	@echo "  make check-replica      Compare row count Primary vs Replica"
-	@echo "  make test-list          GET all products"
-	@echo "  make test-create        POST create product"
-	@echo "  make test-update        PUT update product ID 1"
-	@echo "  make test-delete        DELETE product ID 5"
-	@echo "  make shell-primary      MySQL shell on Primary"
-	@echo "  make shell-replica      MySQL shell on Replica"
-	@echo ""
-EOF
