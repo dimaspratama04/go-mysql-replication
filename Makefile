@@ -101,3 +101,6 @@ shell-primary:
 
 shell-replica:
 	docker exec -it mysql-replica mysql -uroot -prootpassword products_db
+
+shell-proxysql:
+	docker exec -it proxysql mysql -h 127.0.0.1 -uadmin -P6032 -padmin
