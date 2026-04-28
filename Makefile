@@ -97,10 +97,13 @@ test-delete:
 
 # ─── DB Shell Access ─────────────────────────────────────────────
 shell-primary:
-	docker exec -it mysql-primary mysql -uroot -prootpassword products_db
+	docker exec -it mysql-primary mysql -uroot -prootpassword
 
 shell-replica:
-	docker exec -it mysql-replica mysql -uroot -prootpassword products_db
+	docker exec -it mysql-replica mysql -uroot -prootpassword 
 
 shell-proxysql:
 	docker exec -it proxysql mysql -h 127.0.0.1 -uadmin -P6032 -padmin
+
+shell-orchestrator:
+	docker exec -it sql-orchestrator /bin/bash

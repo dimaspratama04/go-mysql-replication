@@ -1,6 +1,7 @@
 -- Migration: Create products table
 -- Run automatically when MySQL container initializes
 
+-- Init database for application
 CREATE DATABASE IF NOT EXISTS products_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE products_db;

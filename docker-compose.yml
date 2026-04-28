@@ -41,10 +41,9 @@ services:
   # Custom image: auto-configures GTID replication on first start
   # ─────────────────────────────────────────────────────────────────
   mysql-replica:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.replica
-    image: mysql:8
+    build:
+      context: .
+      dockerfile: Dockerfile.replica
     container_name: mysql-replica
     restart: unless-stopped
     environment:
@@ -110,7 +109,7 @@ services:
       - "6033:6033"
       - "6070:6070"
     volumes:
-      - ./config/mysql/proxysql.cnf:/etc/proxysql.cnf:ro
+      - ./config/proxysql/proxysql.cnf:/etc/proxysql.cnf:ro
     restart: always
     networks:
       - rnd-network
@@ -124,7 +123,7 @@ services:
       - "3000:3000"
     restart: always
     volumes:
-      - ./config/mysql/orchestrator.conf.json:/etc/orchestrator/orchestrator.conf.json:ro
+      - ./config/sql-orchestrator/orchestrator.conf.json:/etc/orchestrator/orchestrator.conf.json:ro
     networks:
       - rnd-network
     extra_hosts:

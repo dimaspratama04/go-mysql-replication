@@ -64,6 +64,7 @@ DELETE /api/products/:id        Soft delete product
 ### Example Payloads
 
 **POST /api/products**
+
 ```json
 {
   "name": "SSD Samsung 1TB",
@@ -74,6 +75,7 @@ DELETE /api/products/:id        Soft delete product
 ```
 
 **PUT /api/products/:id**
+
 ```json
 {
   "name": "SSD Samsung 1TB Pro",
@@ -88,16 +90,19 @@ DELETE /api/products/:id        Soft delete product
 ## Log Output Examples
 
 **CREATE:**
+
 ```
 10:01:23 INF [CREATE] Product created successfully operation=CREATE product_id=6 name=SSD Samsung 1TB price=1500000 stock=50
 ```
 
 **UPDATE:**
+
 ```
 10:02:11 INF [UPDATE] Product updated successfully operation=UPDATE product_id=6 before.name=SSD Samsung 1TB before.price=1500000 after.price=1350000
 ```
 
 **DELETE:**
+
 ```
 10:03:05 INF [DELETE] Product soft-deleted successfully operation=DELETE type=soft_delete product_id=6 name=SSD Samsung 1TB deleted_at=2026-01-01T10:03:05Z
 ```
@@ -119,6 +124,7 @@ make shell-replica
 ```
 
 **Verify replication manual:**
+
 ```sql
 -- Di Primary: buat data baru
 INSERT INTO products (name, description, price, stock) VALUES ('Test Repl', 'Test', 100000, 1);
@@ -131,14 +137,21 @@ SELECT * FROM products ORDER BY id DESC LIMIT 1;
 
 ## Makefile Commands
 
-| Command | Description |
-|---------|-------------|
-| `make up` | Build + start semua services |
-| `make down` | Stop semua services |
-| `make clean` | Hapus containers + volumes + images |
-| `make status` | Container status + API health |
-| `make replication-status` | MySQL replication thread status |
-| `make check-replica` | Compare row count Primary vs Replica |
-| `make test-create` | Quick test: create product |
-| `make test-list` | Quick test: list products |
-| `make logs-app` | Tail app logs |
+| Command                   | Description                          |
+| ------------------------- | ------------------------------------ |
+| `make up`                 | Build + start semua services         |
+| `make down`               | Stop semua services                  |
+| `make clean`              | Hapus containers + volumes + images  |
+| `make status`             | Container status + API health        |
+| `make replication-status` | MySQL replication thread status      |
+| `make check-replica`      | Compare row count Primary vs Replica |
+| `make test-create`        | Quick test: create product           |
+| `make test-list`          | Quick test: list products            |
+| `make logs-app`           | Tail app logs                        |
+
+CHANGE REPLICATION SOURCE TO
+SOURCE_HOST='mysql-primary',
+SOURCE_USER='replicator',
+SOURCE_PASSWORD='replicatorpass',
+SOURCE_AUTO_POSITION=1,
+GET_SOURCE_PUBLIC_KEY=1;

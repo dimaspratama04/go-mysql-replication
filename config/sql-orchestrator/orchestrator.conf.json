@@ -1,0 +1,33 @@
+{
+  "Debug": true,
+  "ListenAddress": ":3000",
+
+  "BackendDB": "sqlite",
+  "SQLite3DataFile": "/var/lib/orchestrator/orchestrator.db",
+
+  "MySQLTopologySSLSkipVerify": true,
+  "MySQLTopologyUser": "orchestrator",
+  "MySQLTopologyPassword": "orchestratorpass",
+  "MySQLUseSSL": false,
+  "MySQLSkipVerify": true,
+
+  "RecoveryPeriodBlockSeconds": 10,
+  "RecoverMasterClusterFilters": [".*"],
+  "RecoverIntermediateMasterClusterFilters": [".*"],
+  "FailureDetectionPeriodBlockMinutes": 0,
+  "ApplyMySQLPromotionAfterMasterFailover": true,
+  "PreventCrossDataCenterMasterFailover": false,
+  "PreventCrossRegionMasterFailover": false,
+  "FailMasterPromotionOnLagMinutes": 0,
+  "MasterFailoverDetachReplicaMasterHost": false,
+  "MasterFailoverLostInstancesDowntimeMinutes": 0,
+  "PostponeReplicaRecoveryOnLagMinutes": 0,
+
+  "OnFailureDetectionProcesses": ["echo 'Detected {failureType} on {failureCluster}. Affected replicas: {countReplicas}' >> /tmp/recovery.log"],
+  "PreFailoverProcesses": ["echo '[PRE] Failover starting for {failureType} on {failedHost}'"],
+  "PostFailoverProcesses": ["echo '[POST] Failover from {failedHost} to {successorHost}' >> /tmp/recovery.log"],
+  "PostUnsuccessfulFailoverProcesses": [],
+  "PostMasterFailoverProcesses": ["echo 'Recovered from {failureType} on {failureCluster}. Failed: {failedHost}: {failedPort}; Promoted: {successorHost}:{successorPort}' >> /tmp/recovery.log"],
+  "PostIntermediateMasterFailoverProcesses": [],
+  "PostGracefulTakeoverProcesses": ["echo 'Planned takeover complete' >> /tmp/recovery.log"]
+}
