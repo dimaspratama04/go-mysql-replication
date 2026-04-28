@@ -148,10 +148,3 @@ SELECT * FROM products ORDER BY id DESC LIMIT 1;
 | `make test-create`        | Quick test: create product           |
 | `make test-list`          | Quick test: list products            |
 | `make logs-app`           | Tail app logs                        |
-
-CHANGE REPLICATION SOURCE TO
-SOURCE_HOST='mysql-primary',
-SOURCE_USER='replicator',
-SOURCE_PASSWORD='replicatorpass',
-SOURCE_AUTO_POSITION=1,
-GET_SOURCE_PUBLIC_KEY=1;
